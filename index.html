@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="物件スクリーニング">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>不動産投資スクリーニング</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding: 16px;
+    padding-bottom: 40px;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--surface2);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .full { grid-column: 1 / -1; }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .unit {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  input.has-unit { padding-right: 36px; }
+
+  .btn-calc {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 20px;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-calc:active { transform: scale(0.98); background: var(--primary-hover); }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .result-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .result-item .r-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .result-item .r-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .result-item.full { grid-column: 1 / -1; }
+
+  /* Screening table */
+  .screening-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+  }
+
+  .screening-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+  }
+
+  .screening-table td {
+    padding: 7px 6px;
+    border-top: 1px solid var(--surface2);
+    vertical-align: middle;
+  }
+
+  .screening-table td:last-child { text-align: right; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .badge-pass { background: rgba(34,197,94,0.2); color: var(--success); }
+  .badge-fail { background: rgba(239,68,68,0.2); color: var(--danger); }
+  .badge-warn { background: rgba(245,158,11,0.2); color: var(--warning); }
+
+  .verdict {
+    text-align: center;
+    padding: 16px;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+
+  .verdict.pass { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: var(--success); }
+  .verdict.fail { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: var(--danger); }
+
+  /* Portfolio section toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .toggle-label { font-size: 0.8rem; color: var(--text-muted); }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface2);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--primary); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  .portfolio-fields { display: none; }
+  .portfolio-fields.active { display: block; }
+
+  .hidden { display: none !important; }
+
+  .note {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--surface2);
+    margin: 14px 0;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  select option { background: var(--surface); }
+
+  @media (max-width: 360px) {
+    .grid { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>不動産投資スクリーニング</h1>
+<p class="subtitle">物件の投資適格を4基準で判定</p>
+
+<!-- 物件情報 -->
+<div class="card">
+  <div class="card-title">物件情報</div>
+  <div class="grid">
+    <div>
+      <label>物件価格</label>
+      <div class="input-wrap">
+        <input type="number" id="price" value="50000" min="0" step="100" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+    <div>
+      <label>表面利回り</label>
+      <div class="input-wrap">
+        <input type="number" id="grossYield" value="8.0" min="0" step="0.1" class="has-unit">
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div>
+      <label>空室率</label>
+      <div class="input-wrap">
+        <input type="number" id="vacancyRate" value="10" min="0" max="100" step="1" class="has-unit">
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div>
+      <label>物件立地</label>
+      <select id="location">
+        <option value="urban">都市部</option>
+        <option value="city" selected>市内好立地</option>
+        <option value="rural">田舎</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- 融資条件 -->
+<div class="card">
+  <div class="card-title">融資条件</div>
+  <div class="grid">
+    <div>
+      <label>借入額</label>
+      <div class="input-wrap">
+        <input type="number" id="loanAmount" value="45000" min="0" step="100" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+    <div>
+      <label>金利（年）</label>
+      <div class="input-wrap">
+        <input type="number" id="interestRate" value="1.8" min="0" step="0.05" class="has-unit">
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div>
+      <label>返済期間</label>
+      <div class="input-wrap">
+        <input type="number" id="loanYears" value="25" min="1" max="50" step="1" class="has-unit">
+        <span class="unit">年</span>
+      </div>
+    </div>
+    <div>
+      <label>頭金</label>
+      <div class="input-wrap">
+        <input type="number" id="downPayment" value="5000" min="0" step="100" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+    <div class="full">
+      <label>諸費用</label>
+      <div class="input-wrap">
+        <input type="number" id="initialCost" value="500" min="0" step="50" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 月次コスト -->
+<div class="card">
+  <div class="card-title">月次コスト</div>
+  <div class="grid">
+    <div>
+      <label>管理手数料</label>
+      <div class="input-wrap">
+        <input type="number" id="mgmtFee" value="5" min="0" step="0.5" class="has-unit">
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div>
+      <label>光熱費</label>
+      <div class="input-wrap">
+        <input type="number" id="utilities" value="3000" min="0" step="500" class="has-unit">
+        <span class="unit">円</span>
+      </div>
+    </div>
+    <div>
+      <label>ネット回線</label>
+      <div class="input-wrap">
+        <input type="number" id="internet" value="3000" min="0" step="500" class="has-unit">
+        <span class="unit">円</span>
+      </div>
+    </div>
+    <div>
+      <label>固定資産税（年）</label>
+      <div class="input-wrap">
+        <input type="number" id="propertyTax" value="30" min="0" step="1" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+    <div class="full">
+      <label>修繕積立費（年）</label>
+      <div class="input-wrap">
+        <input type="number" id="repair" value="20" min="0" step="1" class="has-unit">
+        <span class="unit">万円</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ポートフォリオ -->
+<div class="card">
+  <div class="card-title">ポートフォリオ（既存物件）</div>
+  <div class="toggle-row">
+    <span class="toggle-label">既存物件データを入力する</span>
+    <label class="toggle">
+      <input type="checkbox" id="portfolioToggle">
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+  <div class="portfolio-fields" id="portfolioFields">
+    <div class="grid">
+      <div>
+        <label>既存DS合計（月）</label>
+        <div class="input-wrap">
+          <input type="number" id="existingDS" value="0" min="0" step="1000" class="has-unit">
+          <span class="unit">円</span>
+        </div>
+      </div>
+      <div>
+        <label>既存家賃合計（月）</label>
+        <div class="input-wrap">
+          <input type="number" id="existingRent" value="0" min="0" step="1000" class="has-unit">
+          <span class="unit">円</span>
+        </div>
+      </div>
+    </div>
+    <p class="note">※既存物件全体の月次返済額と月次家賃収入の合計を入力してください</p>
+  </div>
+</div>
+
+<button class="btn-calc" onclick="calculate()">スクリーニング判定を実行</button>
+
+<!-- 結果 -->
+<div class="card hidden" id="resultCard">
+  <div class="card-title">計算結果</div>
+  <div class="result-grid">
+    <div class="result-item">
+      <div class="r-label">実効賃料（月）</div>
+      <div class="r-value" id="r-effectiveRent">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">元利返済額（月）</div>
+      <div class="r-value" id="r-ds">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">月次CF</div>
+      <div class="r-value" id="r-monthlyCF">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">年間CF</div>
+      <div class="r-value" id="r-annualCF">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">CF率</div>
+      <div class="r-value" id="r-cfRate">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">本物件 返済比率</div>
+      <div class="r-value" id="r-repayRatio">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">現金回収期間</div>
+      <div class="r-value" id="r-payback">-</div>
+    </div>
+    <div class="result-item">
+      <div class="r-label">PF返済比率</div>
+      <div class="r-value" id="r-pfRepay">-</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">スクリーニング判定</div>
+
+  <table class="screening-table">
+    <thead>
+      <tr>
+        <th>基準</th>
+        <th>目標値</th>
+        <th>実績値</th>
+        <th>判定</th>
+      </tr>
+    </thead>
+    <tbody id="screeningBody"></tbody>
+  </table>
+
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script>
+  // Portfolio toggle
+  document.getElementById('portfolioToggle').addEventListener('change', function() {
+    document.getElementById('portfolioFields').classList.toggle('active', this.checked);
+  });
+
+  function fmt(value, digits = 0) {
+    return value.toLocaleString('ja-JP', { maximumFractionDigits: digits });
+  }
+
+  function fmtMan(yen, digits = 1) {
+    return fmt(yen / 10000, digits) + '万円';
+  }
+
+  function calcPMT(rate, nper, pv) {
+    // 元利均等返済 月次
+    if (rate === 0) return pv / nper;
+    return pv * rate * Math.pow(1 + rate, nper) / (Math.pow(1 + rate, nper) - 1);
+  }
+
+  function badge(pass, label) {
+    const cls = pass ? 'badge-pass' : 'badge-fail';
+    const icon = pass ? '✓' : '✗';
+    return `<span class="badge ${cls}">${icon} ${label}</span>`;
+  }
+
+  function calculate() {
+    // --- Inputs ---
+    const price       = parseFloat(document.getElementById('price').value) * 10000;
+    const grossYield  = parseFloat(document.getElementById('grossYield').value) / 100;
+    const vacancy     = parseFloat(document.getElementById('vacancyRate').value) / 100;
+    const location    = document.getElementById('location').value;
+    const loanAmount  = parseFloat(document.getElementById('loanAmount').value) * 10000;
+    const interestRate= parseFloat(document.getElementById('interestRate').value) / 100;
+    const loanYears   = parseFloat(document.getElementById('loanYears').value);
+    const downPayment = parseFloat(document.getElementById('downPayment').value) * 10000;
+    const initialCost = parseFloat(document.getElementById('initialCost').value) * 10000;
+    const mgmtFeePct  = parseFloat(document.getElementById('mgmtFee').value) / 100;
+    const utilities   = parseFloat(document.getElementById('utilities').value);
+    const internet    = parseFloat(document.getElementById('internet').value);
+    const propTaxYear = parseFloat(document.getElementById('propertyTax').value) * 10000;
+    const repairYear  = parseFloat(document.getElementById('repair').value) * 10000;
+
+    const hasPortfolio= document.getElementById('portfolioToggle').checked;
+    const existingDS  = hasPortfolio ? parseFloat(document.getElementById('existingDS').value) : 0;
+    const existingRent= hasPortfolio ? parseFloat(document.getElementById('existingRent').value) : 0;
+
+    // --- Calc ---
+    const grossRentMonthly = price * grossYield / 12;
+    const effectiveRentMonthly = grossRentMonthly * (1 - vacancy);
+
+    const monthlyRate = interestRate / 12;
+    const nper = loanYears * 12;
+    const dsMonthly = loanAmount > 0 ? calcPMT(monthlyRate, nper, loanAmount) : 0;
+
+    const mgmtFeeMonthly = effectiveRentMonthly * mgmtFeePct;
+    const propTaxMonthly = propTaxYear / 12;
+    const repairMonthly  = repairYear / 12;
+
+    const monthlyCF = effectiveRentMonthly - dsMonthly - mgmtFeeMonthly
+                    - utilities - internet - propTaxMonthly - repairMonthly;
+    const annualCF  = monthlyCF * 12;
+
+    const cfRate    = price > 0 ? annualCF / price : 0;
+
+    const repayRatio = effectiveRentMonthly > 0 ? dsMonthly / effectiveRentMonthly : 0;
+
+    const totalInitial = downPayment + initialCost;
+    const paybackYears = annualCF > 0 ? totalInitial / annualCF : Infinity;
+
+    // Portfolio repayment ratio
+    const pfTotalDS   = dsMonthly + existingDS;
+    const pfTotalRent = effectiveRentMonthly + existingRent;
+    const pfRepayRatio = pfTotalRent > 0 ? pfTotalDS / pfTotalRent : repayRatio;
+
+    // --- CF rate threshold ---
+    const cfRateThreshold = { urban: 0.02, city: 0.03, rural: 0.04 }[location];
+    const locationLabel  = { urban: '都市部2%', city: '市内好立地3%', rural: '田舎4%' }[location];
+
+    // --- Screening ---
+    const checks = [
+      {
+        label: '月次CF 年間合計',
+        target: '100万円以上',
+        actual: fmtMan(annualCF),
+        pass: annualCF >= 1000000
+      },
+      {
+        label: '本物件 返済比率',
+        target: '65%以下',
+        actual: (repayRatio * 100).toFixed(1) + '%',
+        pass: repayRatio <= 0.65
+      },
+      {
+        label: 'PF平均 返済比率',
+        target: '55%以下',
+        actual: hasPortfolio
+          ? (pfRepayRatio * 100).toFixed(1) + '%'
+          : '— (データなし)',
+        pass: hasPortfolio ? pfRepayRatio <= 0.55 : true,
+        warn: !hasPortfolio
+      },
+      {
+        label: 'CF率',
+        target: locationLabel + '以上',
+        actual: (cfRate * 100).toFixed(2) + '%',
+        pass: cfRate >= cfRateThreshold
+      },
+      {
+        label: '現金回収期間',
+        target: '8年以内',
+        actual: isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞',
+        pass: isFinite(paybackYears) && paybackYears <= 8
+      }
+    ];
+
+    // --- Render results ---
+    const el = id => document.getElementById(id);
+    const colorCF = v => v >= 0 ? 'var(--success)' : 'var(--danger)';
+
+    el('r-effectiveRent').textContent = fmt(effectiveRentMonthly) + '円';
+    el('r-ds').textContent = fmt(dsMonthly) + '円';
+    el('r-monthlyCF').textContent = fmt(monthlyCF) + '円';
+    el('r-monthlyCF').style.color = colorCF(monthlyCF);
+    el('r-annualCF').textContent = fmtMan(annualCF);
+    el('r-annualCF').style.color = colorCF(annualCF);
+    el('r-cfRate').textContent = (cfRate * 100).toFixed(2) + '%';
+    el('r-cfRate').style.color = cfRate >= cfRateThreshold ? 'var(--success)' : 'var(--danger)';
+    el('r-repayRatio').textContent = (repayRatio * 100).toFixed(1) + '%';
+    el('r-repayRatio').style.color = repayRatio <= 0.65 ? 'var(--success)' : 'var(--danger)';
+    el('r-payback').textContent = isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞';
+    el('r-payback').style.color = (isFinite(paybackYears) && paybackYears <= 8) ? 'var(--success)' : 'var(--danger)';
+
+    if (hasPortfolio) {
+      el('r-pfRepay').textContent = (pfRepayRatio * 100).toFixed(1) + '%';
+      el('r-pfRepay').style.color = pfRepayRatio <= 0.55 ? 'var(--success)' : 'var(--danger)';
+    } else {
+      el('r-pfRepay').textContent = '—';
+      el('r-pfRepay').style.color = 'var(--text-muted)';
+    }
+
+    // Screening table
+    const tbody = document.getElementById('screeningBody');
+    tbody.innerHTML = checks.map(c => `
+      <tr>
+        <td>${c.label}</td>
+        <td style="color:var(--text-muted)">${c.target}</td>
+        <td><strong>${c.actual}</strong></td>
+        <td>${c.warn
+          ? `<span class="badge badge-warn">— 未入力</span>`
+          : badge(c.pass, c.pass ? 'OK' : 'NG')
+        }</td>
+      </tr>
+    `).join('');
+
+    // Overall verdict
+    const allPass = checks.every(c => c.warn || c.pass);
+    const verdictEl = document.getElementById('verdict');
+    if (allPass) {
+      verdictEl.textContent = '✓ 全基準クリア — 投資適格';
+      verdictEl.className = 'verdict pass';
+    } else {
+      const failCount = checks.filter(c => !c.warn && !c.pass).length;
+      verdictEl.textContent = `✗ ${failCount}基準未達 — 再検討推奨`;
+      verdictEl.className = 'verdict fail';
+    }
+
+    // Show result
+    document.getElementById('resultCard').classList.remove('hidden');
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
