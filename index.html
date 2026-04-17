@@ -607,9 +607,9 @@
       },
       {
         label: '本物件 返済比率',
-        target: '65%以下',
+        target: '55%以下',
         actual: (repayRatio * 100).toFixed(1) + '%',
-        pass: repayRatio <= 0.65
+        pass: repayRatio <= 0.55
       },
       {
         label: 'PF平均 返済比率',
@@ -647,7 +647,7 @@
     el('r-cfRate').textContent = (cfRate * 100).toFixed(2) + '%';
     el('r-cfRate').style.color = cfRate >= cfRateThreshold ? 'var(--success)' : 'var(--danger)';
     el('r-repayRatio').textContent = (repayRatio * 100).toFixed(1) + '%';
-    el('r-repayRatio').style.color = repayRatio <= 0.65 ? 'var(--success)' : 'var(--danger)';
+    el('r-repayRatio').style.color = repayRatio <= 0.55 ? 'var(--success)' : 'var(--danger)';
     el('r-payback').textContent = isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞';
     el('r-payback').style.color = (isFinite(paybackYears) && paybackYears <= 8) ? 'var(--success)' : 'var(--danger)';
 
@@ -689,6 +689,47 @@
     document.getElementById('resultCard').classList.remove('hidden');
     document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  // --- localStorage 永続化 ---
+  const STORAGE_KEY = 'realestate-screening-inputs';
+  const INPUT_IDS = [
+    'price','grossYield','vacancyRate','location',
+    'loanAmount','interestRate','loanYears','downPayment','initialCost',
+    'mgmtFee','utilities','internet','propertyTax','repair',
+    'existingDS','existingRent'
+  ];
+
+  function saveInputs() {
+    const data = {};
+    INPUT_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+    data['portfolioToggle'] = document.getElementById('portfolioToggle').checked;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function loadInputs() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      INPUT_IDS.forEach(id => {
+        if (data[id] !== undefined) document.getElementById(id).value = data[id];
+      });
+      if (data['portfolioToggle'] !== undefined) {
+        const toggle = document.getElementById('portfolioToggle');
+        toggle.checked = data['portfolioToggle'];
+        document.getElementById('portfolioFields').classList.toggle('active', toggle.checked);
+      }
+    } catch(e) {}
+  }
+
+  // 入力変化を監視して保存
+  INPUT_IDS.forEach(id => {
+    document.getElementById(id).addEventListener('input', saveInputs);
+  });
+  document.getElementById('portfolioToggle').addEventListener('change', saveInputs);
+
+  // ページ読み込み時に復元
+  loadInputs();
 
   // Service Worker
   if ('serviceWorker' in navigator) {
