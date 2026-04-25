@@ -1,4 +1,4 @@
-const CACHE_NAME = 'realestate-screening-v1';
+const CACHE_NAME = 'realestate-screening-v3';
 const ASSETS = [
   './',
   './index.html',

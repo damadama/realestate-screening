@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>不動産投資スクリーニング</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -35,7 +36,7 @@
     color: var(--text);
     min-height: 100dvh;
     padding: 16px;
-    padding-bottom: 40px;
+    padding-bottom: 48px;
   }
 
   h1 {
@@ -53,6 +54,7 @@
     margin-bottom: 20px;
   }
 
+  /* ===== Card ===== */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -73,20 +75,12 @@
     border-bottom: 1px solid var(--surface2);
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+  /* ===== Grid ===== */
+  .grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .full  { grid-column: 1 / -1; }
 
-  .grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-
-  .full { grid-column: 1 / -1; }
-
+  /* ===== Inputs ===== */
   label {
     display: block;
     font-size: 0.72rem;
@@ -95,9 +89,7 @@
     font-weight: 500;
   }
 
-  .input-wrap {
-    position: relative;
-  }
+  .input-wrap { position: relative; }
 
   input[type="number"], select {
     width: 100%;
@@ -131,7 +123,25 @@
   }
 
   input.has-unit { padding-right: 36px; }
+  input.has-unit-lg { padding-right: 52px; }
 
+  /* ===== Auto-calc display ===== */
+  .auto-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    min-height: 38px;
+  }
+
+  .auto-row .auto-label { color: var(--text-muted); font-size: 0.72rem; }
+  .auto-row .auto-value { font-weight: 700; color: var(--primary); }
+
+  /* ===== Buttons ===== */
   .btn-calc {
     width: 100%;
     background: var(--primary);
@@ -150,6 +160,29 @@
 
   .btn-calc:active { transform: scale(0.98); background: var(--primary-hover); }
 
+  .btn-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 14px;
+  }
+
+  .btn-copy:active { background: var(--border); }
+  .btn-copy.copied { background: rgba(34,197,94,0.2); border-color: var(--success); color: var(--success); }
+
+  /* ===== Results ===== */
   .result-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -164,20 +197,26 @@
     text-align: center;
   }
 
+  .result-item.highlight {
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.35);
+  }
+
   .result-item .r-label {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     color: var(--text-muted);
     margin-bottom: 4px;
+    line-height: 1.3;
   }
 
   .result-item .r-value {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
   }
 
   .result-item.full { grid-column: 1 / -1; }
 
-  /* Screening table */
+  /* ===== Screening table ===== */
   .screening-table {
     width: 100%;
     border-collapse: collapse;
@@ -211,8 +250,8 @@
     font-weight: 700;
   }
 
-  .badge-pass { background: rgba(34,197,94,0.2); color: var(--success); }
-  .badge-fail { background: rgba(239,68,68,0.2); color: var(--danger); }
+  .badge-pass { background: rgba(34,197,94,0.2);  color: var(--success); }
+  .badge-fail { background: rgba(239,68,68,0.2);  color: var(--danger); }
   .badge-warn { background: rgba(245,158,11,0.2); color: var(--warning); }
 
   .verdict {
@@ -228,7 +267,7 @@
   .verdict.pass { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: var(--success); }
   .verdict.fail { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: var(--danger); }
 
-  /* Portfolio section toggle */
+  /* ===== Portfolio toggle ===== */
   .toggle-row {
     display: flex;
     align-items: center;
@@ -238,13 +277,7 @@
 
   .toggle-label { font-size: 0.8rem; color: var(--text-muted); }
 
-  .toggle {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-
+  .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
 
   .toggle-slider {
@@ -272,6 +305,7 @@
   .portfolio-fields { display: none; }
   .portfolio-fields.active { display: block; }
 
+  /* ===== Misc ===== */
   .hidden { display: none !important; }
 
   .note {
@@ -281,11 +315,7 @@
     line-height: 1.6;
   }
 
-  .divider {
-    height: 1px;
-    background: var(--surface2);
-    margin: 14px 0;
-  }
+  .divider { height: 1px; background: var(--surface2); margin: 14px 0; }
 
   .section-label {
     font-size: 0.72rem;
@@ -298,13 +328,34 @@
 
   select option { background: var(--surface); }
 
+  /* コピー中オーバーレイ */
+  .copy-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--success);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .copy-overlay.show { opacity: 1; }
+
   @media (max-width: 360px) {
-    .grid { grid-template-columns: 1fr; }
+    .grid   { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
 <body>
+
+<div class="copy-overlay" id="copyOverlay">✓ クリップボードにコピーしました</div>
 
 <h1>不動産投資スクリーニング</h1>
 <p class="subtitle">物件の投資適格を4基準で判定</p>
@@ -316,15 +367,30 @@
     <div>
       <label>物件価格</label>
       <div class="input-wrap">
-        <input type="number" id="price" value="50000" min="0" step="100" class="has-unit">
+        <input type="number" id="price" value="50000" min="0" step="100" class="has-unit" oninput="autoCalc()">
         <span class="unit">万円</span>
       </div>
     </div>
     <div>
-      <label>表面利回り</label>
+      <label>戸数</label>
       <div class="input-wrap">
-        <input type="number" id="grossYield" value="8.0" min="0" step="0.1" class="has-unit">
-        <span class="unit">%</span>
+        <input type="number" id="units" value="10" min="1" step="1" class="has-unit" oninput="autoCalc()">
+        <span class="unit">戸</span>
+      </div>
+    </div>
+    <div class="full">
+      <label>1戸あたり月額賃料</label>
+      <div class="input-wrap">
+        <input type="number" id="monthlyRentPerUnit" value="45000" min="0" step="1000" class="has-unit-lg" oninput="autoCalc()">
+        <span class="unit">円/戸</span>
+      </div>
+    </div>
+    <!-- 自動計算：表面利回り -->
+    <div>
+      <label>表面利回り（自動）</label>
+      <div class="auto-row">
+        <span class="auto-label">利回り</span>
+        <span class="auto-value" id="auto-grossYield">—</span>
       </div>
     </div>
     <div>
@@ -377,11 +443,19 @@
         <span class="unit">万円</span>
       </div>
     </div>
-    <div class="full">
-      <label>諸費用</label>
+    <!-- 諸費用率 + 自動計算 -->
+    <div>
+      <label>諸費用率</label>
       <div class="input-wrap">
-        <input type="number" id="initialCost" value="500" min="0" step="50" class="has-unit">
-        <span class="unit">万円</span>
+        <input type="number" id="initialCostRate" value="7" min="0" step="0.5" class="has-unit" oninput="autoCalc()">
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div>
+      <label>諸費用（自動）</label>
+      <div class="auto-row">
+        <span class="auto-label">物件価格×率</span>
+        <span class="auto-value" id="auto-initialCost">—</span>
       </div>
     </div>
   </div>
@@ -392,41 +466,20 @@
   <div class="card-title">月次コスト</div>
   <div class="grid">
     <div>
-      <label>管理手数料</label>
+      <label>運営コスト率</label>
       <div class="input-wrap">
-        <input type="number" id="mgmtFee" value="5" min="0" step="0.5" class="has-unit">
+        <input type="number" id="opCostRate" value="20" min="0" max="100" step="1" class="has-unit">
         <span class="unit">%</span>
       </div>
     </div>
     <div>
-      <label>光熱費</label>
-      <div class="input-wrap">
-        <input type="number" id="utilities" value="3000" min="0" step="500" class="has-unit">
-        <span class="unit">円</span>
-      </div>
-    </div>
-    <div>
-      <label>ネット回線</label>
-      <div class="input-wrap">
-        <input type="number" id="internet" value="3000" min="0" step="500" class="has-unit">
-        <span class="unit">円</span>
-      </div>
-    </div>
-    <div>
-      <label>固定資産税（年）</label>
-      <div class="input-wrap">
-        <input type="number" id="propertyTax" value="30" min="0" step="1" class="has-unit">
-        <span class="unit">万円</span>
-      </div>
-    </div>
-    <div class="full">
-      <label>修繕積立費（年）</label>
-      <div class="input-wrap">
-        <input type="number" id="repair" value="20" min="0" step="1" class="has-unit">
-        <span class="unit">万円</span>
+      <label>内訳イメージ</label>
+      <div class="auto-row" style="font-size:0.68rem; color:var(--text-muted);">
+        <span>管理・税・修繕・光熱費など</span>
       </div>
     </div>
   </div>
+  <p class="note">※実効賃料 × コスト率で月次コストを一括計算します（管理手数料・固定資産税・修繕積立・光熱費・ネット等の合計を想定）</p>
 </div>
 
 <!-- ポートフォリオ -->
@@ -465,6 +518,30 @@
 <!-- 結果 -->
 <div class="card hidden" id="resultCard">
   <div class="card-title">計算結果</div>
+
+  <!-- 利回り系サマリー -->
+  <div class="section-label">利回り・収益指標</div>
+  <div class="result-grid" style="margin-bottom:16px;">
+    <div class="result-item highlight">
+      <div class="r-label">表面利回り</div>
+      <div class="r-value" id="r-grossYield">-</div>
+    </div>
+    <div class="result-item highlight">
+      <div class="r-label">返済後利回り<br><span style="font-size:0.62rem;font-weight:400">(CF÷物件価格)</span></div>
+      <div class="r-value" id="r-cfRate">-</div>
+    </div>
+    <div class="result-item highlight">
+      <div class="r-label">自己資金回収率<br><span style="font-size:0.62rem;font-weight:400">((諸費用+頭金)÷年間CF)</span></div>
+      <div class="r-value" id="r-payback">-</div>
+    </div>
+    <div class="result-item highlight">
+      <div class="r-label">本物件 返済比率</div>
+      <div class="r-value" id="r-repayRatio">-</div>
+    </div>
+  </div>
+
+  <!-- CF詳細 -->
+  <div class="section-label">キャッシュフロー詳細</div>
   <div class="result-grid">
     <div class="result-item">
       <div class="r-label">実効賃料（月）</div>
@@ -475,24 +552,20 @@
       <div class="r-value" id="r-ds">-</div>
     </div>
     <div class="result-item">
+      <div class="r-label">運営コスト（月）</div>
+      <div class="r-value" id="r-opCost">-</div>
+    </div>
+    <div class="result-item">
       <div class="r-label">月次CF</div>
       <div class="r-value" id="r-monthlyCF">-</div>
     </div>
-    <div class="result-item">
+    <div class="result-item full">
       <div class="r-label">年間CF</div>
       <div class="r-value" id="r-annualCF">-</div>
     </div>
     <div class="result-item">
-      <div class="r-label">CF率</div>
-      <div class="r-value" id="r-cfRate">-</div>
-    </div>
-    <div class="result-item">
-      <div class="r-label">本物件 返済比率</div>
-      <div class="r-value" id="r-repayRatio">-</div>
-    </div>
-    <div class="result-item">
-      <div class="r-label">現金回収期間</div>
-      <div class="r-value" id="r-payback">-</div>
+      <div class="r-label">諸費用</div>
+      <div class="r-value" id="r-initialCost">-</div>
     </div>
     <div class="result-item">
       <div class="r-label">PF返済比率</div>
@@ -516,88 +589,102 @@
   </table>
 
   <div class="verdict" id="verdict"></div>
+
+  <!-- Notionコピーボタン -->
+  <button class="btn-copy" id="btnCopy" onclick="copyResultImage()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    Notionへ画像コピー
+  </button>
 </div>
 
 <script>
-  // Portfolio toggle
-  document.getElementById('portfolioToggle').addEventListener('change', function() {
-    document.getElementById('portfolioFields').classList.toggle('active', this.checked);
-  });
+  /* ===== Utility ===== */
+  const $ = id => document.getElementById(id);
+  const num = id => parseFloat($(id).value) || 0;
 
-  function fmt(value, digits = 0) {
-    return value.toLocaleString('ja-JP', { maximumFractionDigits: digits });
-  }
-
-  function fmtMan(yen, digits = 1) {
-    return fmt(yen / 10000, digits) + '万円';
-  }
+  function fmt(v, d = 0)    { return v.toLocaleString('ja-JP', { maximumFractionDigits: d }); }
+  function fmtMan(v, d = 1) { return fmt(v / 10000, d) + '万円'; }
+  function fmtPct(v, d = 2) { return (v * 100).toFixed(d) + '%'; }
 
   function calcPMT(rate, nper, pv) {
-    // 元利均等返済 月次
     if (rate === 0) return pv / nper;
     return pv * rate * Math.pow(1 + rate, nper) / (Math.pow(1 + rate, nper) - 1);
   }
 
   function badge(pass, label) {
-    const cls = pass ? 'badge-pass' : 'badge-fail';
+    const cls  = pass ? 'badge-pass' : 'badge-fail';
     const icon = pass ? '✓' : '✗';
     return `<span class="badge ${cls}">${icon} ${label}</span>`;
   }
 
+  /* ===== Auto-calc (表面利回り & 諸費用) ===== */
+  function autoCalc() {
+    const price    = num('price') * 10000;
+    const units    = num('units');
+    const rent     = num('monthlyRentPerUnit');
+    const costRate = num('initialCostRate') / 100;
+
+    const annualRent = units * rent * 12;
+    const grossYield = price > 0 ? annualRent / price : 0;
+    const initCost   = price * costRate;
+
+    $('auto-grossYield').textContent = price > 0 ? fmtPct(grossYield) : '—';
+    $('auto-initialCost').textContent = price > 0 ? fmtMan(initCost)  : '—';
+  }
+
+  /* ===== Main calculation ===== */
   function calculate() {
-    // --- Inputs ---
-    const price       = parseFloat(document.getElementById('price').value) * 10000;
-    const grossYield  = parseFloat(document.getElementById('grossYield').value) / 100;
-    const vacancy     = parseFloat(document.getElementById('vacancyRate').value) / 100;
-    const location    = document.getElementById('location').value;
-    const loanAmount  = parseFloat(document.getElementById('loanAmount').value) * 10000;
-    const interestRate= parseFloat(document.getElementById('interestRate').value) / 100;
-    const loanYears   = parseFloat(document.getElementById('loanYears').value);
-    const downPayment = parseFloat(document.getElementById('downPayment').value) * 10000;
-    const initialCost = parseFloat(document.getElementById('initialCost').value) * 10000;
-    const mgmtFeePct  = parseFloat(document.getElementById('mgmtFee').value) / 100;
-    const utilities   = parseFloat(document.getElementById('utilities').value);
-    const internet    = parseFloat(document.getElementById('internet').value);
-    const propTaxYear = parseFloat(document.getElementById('propertyTax').value) * 10000;
-    const repairYear  = parseFloat(document.getElementById('repair').value) * 10000;
+    const price        = num('price') * 10000;
+    const units        = num('units');
+    const rentPerUnit  = num('monthlyRentPerUnit');
+    const vacancy      = num('vacancyRate') / 100;
+    const location     = $('location').value;
+    const loanAmount   = num('loanAmount') * 10000;
+    const interestRate = num('interestRate') / 100;
+    const loanYears    = num('loanYears');
+    const downPayment  = num('downPayment') * 10000;
+    const initialCostRate = num('initialCostRate') / 100;
+    const opCostRate   = num('opCostRate') / 100;
 
-    const hasPortfolio= document.getElementById('portfolioToggle').checked;
-    const existingDS  = hasPortfolio ? parseFloat(document.getElementById('existingDS').value) : 0;
-    const existingRent= hasPortfolio ? parseFloat(document.getElementById('existingRent').value) : 0;
+    const hasPortfolio = $('portfolioToggle').checked;
+    const existingDS   = hasPortfolio ? num('existingDS')   : 0;
+    const existingRent = hasPortfolio ? num('existingRent') : 0;
 
-    // --- Calc ---
-    const grossRentMonthly = price * grossYield / 12;
+    /* --- 賃料計算 --- */
+    const grossRentMonthly     = units * rentPerUnit;
     const effectiveRentMonthly = grossRentMonthly * (1 - vacancy);
+    const annualRent           = grossRentMonthly * 12;
+    const grossYield           = price > 0 ? annualRent / price : 0;
 
+    /* --- 融資 --- */
     const monthlyRate = interestRate / 12;
-    const nper = loanYears * 12;
-    const dsMonthly = loanAmount > 0 ? calcPMT(monthlyRate, nper, loanAmount) : 0;
+    const nper        = loanYears * 12;
+    const dsMonthly   = loanAmount > 0 ? calcPMT(monthlyRate, nper, loanAmount) : 0;
 
-    const mgmtFeeMonthly = effectiveRentMonthly * mgmtFeePct;
-    const propTaxMonthly = propTaxYear / 12;
-    const repairMonthly  = repairYear / 12;
+    /* --- コスト --- */
+    const opCostMonthly = effectiveRentMonthly * opCostRate;
+    const initialCost   = price * initialCostRate;
 
-    const monthlyCF = effectiveRentMonthly - dsMonthly - mgmtFeeMonthly
-                    - utilities - internet - propTaxMonthly - repairMonthly;
+    /* --- CF --- */
+    const monthlyCF = effectiveRentMonthly - dsMonthly - opCostMonthly;
     const annualCF  = monthlyCF * 12;
 
-    const cfRate    = price > 0 ? annualCF / price : 0;
-
-    const repayRatio = effectiveRentMonthly > 0 ? dsMonthly / effectiveRentMonthly : 0;
-
+    /* --- 指標 --- */
+    const cfRate      = price > 0 ? annualCF / price : 0;              // 返済後利回り
+    const repayRatio  = effectiveRentMonthly > 0 ? dsMonthly / effectiveRentMonthly : 0;
     const totalInitial = downPayment + initialCost;
-    const paybackYears = annualCF > 0 ? totalInitial / annualCF : Infinity;
+    const paybackYears = annualCF > 0 ? totalInitial / annualCF : Infinity; // 自己資金回収率（年）
 
-    // Portfolio repayment ratio
-    const pfTotalDS   = dsMonthly + existingDS;
-    const pfTotalRent = effectiveRentMonthly + existingRent;
+    /* --- ポートフォリオ --- */
+    const pfTotalDS    = dsMonthly + existingDS;
+    const pfTotalRent  = effectiveRentMonthly + existingRent;
     const pfRepayRatio = pfTotalRent > 0 ? pfTotalDS / pfTotalRent : repayRatio;
 
-    // --- CF rate threshold ---
+    /* --- CF率閾値 --- */
     const cfRateThreshold = { urban: 0.02, city: 0.03, rural: 0.04 }[location];
-    const locationLabel  = { urban: '都市部2%', city: '市内好立地3%', rural: '田舎4%' }[location];
+    const locationLabel   = { urban: '都市部2%', city: '市内好立地3%', rural: '田舎4%' }[location];
 
-    // --- Screening ---
+    /* --- スクリーニング基準 --- */
     const checks = [
       {
         label: '月次CF 年間合計',
@@ -608,60 +695,67 @@
       {
         label: '本物件 返済比率',
         target: '55%以下',
-        actual: (repayRatio * 100).toFixed(1) + '%',
+        actual: fmtPct(repayRatio, 1),
         pass: repayRatio <= 0.55
       },
       {
         label: 'PF平均 返済比率',
         target: '55%以下',
-        actual: hasPortfolio
-          ? (pfRepayRatio * 100).toFixed(1) + '%'
-          : '— (データなし)',
+        actual: hasPortfolio ? fmtPct(pfRepayRatio, 1) : '— (データなし)',
         pass: hasPortfolio ? pfRepayRatio <= 0.55 : true,
         warn: !hasPortfolio
       },
       {
-        label: 'CF率',
+        label: 'CF率（返済後利回り）',
         target: locationLabel + '以上',
-        actual: (cfRate * 100).toFixed(2) + '%',
+        actual: fmtPct(cfRate),
         pass: cfRate >= cfRateThreshold
       },
       {
-        label: '現金回収期間',
+        label: '自己資金回収期間',
         target: '8年以内',
         actual: isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞',
         pass: isFinite(paybackYears) && paybackYears <= 8
       }
     ];
 
-    // --- Render results ---
-    const el = id => document.getElementById(id);
-    const colorCF = v => v >= 0 ? 'var(--success)' : 'var(--danger)';
+    /* --- 結果表示 --- */
+    const color = (v, good) => good ? 'var(--success)' : 'var(--danger)';
 
-    el('r-effectiveRent').textContent = fmt(effectiveRentMonthly) + '円';
-    el('r-ds').textContent = fmt(dsMonthly) + '円';
-    el('r-monthlyCF').textContent = fmt(monthlyCF) + '円';
-    el('r-monthlyCF').style.color = colorCF(monthlyCF);
-    el('r-annualCF').textContent = fmtMan(annualCF);
-    el('r-annualCF').style.color = colorCF(annualCF);
-    el('r-cfRate').textContent = (cfRate * 100).toFixed(2) + '%';
-    el('r-cfRate').style.color = cfRate >= cfRateThreshold ? 'var(--success)' : 'var(--danger)';
-    el('r-repayRatio').textContent = (repayRatio * 100).toFixed(1) + '%';
-    el('r-repayRatio').style.color = repayRatio <= 0.55 ? 'var(--success)' : 'var(--danger)';
-    el('r-payback').textContent = isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞';
-    el('r-payback').style.color = (isFinite(paybackYears) && paybackYears <= 8) ? 'var(--success)' : 'var(--danger)';
+    $('r-grossYield').textContent   = fmtPct(grossYield);
+    $('r-grossYield').style.color   = 'var(--text)';
+
+    $('r-cfRate').textContent       = fmtPct(cfRate);
+    $('r-cfRate').style.color       = color(cfRate, cfRate >= cfRateThreshold);
+
+    $('r-payback').textContent      = isFinite(paybackYears) ? paybackYears.toFixed(1) + '年' : '∞';
+    $('r-payback').style.color      = color(paybackYears, isFinite(paybackYears) && paybackYears <= 8);
+
+    $('r-repayRatio').textContent   = fmtPct(repayRatio, 1);
+    $('r-repayRatio').style.color   = color(repayRatio, repayRatio <= 0.55);
+
+    $('r-effectiveRent').textContent = fmt(effectiveRentMonthly) + '円';
+    $('r-ds').textContent           = fmt(dsMonthly) + '円';
+    $('r-opCost').textContent       = fmt(opCostMonthly) + '円';
+
+    $('r-monthlyCF').textContent    = fmt(monthlyCF) + '円';
+    $('r-monthlyCF').style.color    = color(monthlyCF, monthlyCF >= 0);
+
+    $('r-annualCF').textContent     = fmtMan(annualCF);
+    $('r-annualCF').style.color     = color(annualCF, annualCF >= 0);
+
+    $('r-initialCost').textContent  = fmtMan(initialCost);
 
     if (hasPortfolio) {
-      el('r-pfRepay').textContent = (pfRepayRatio * 100).toFixed(1) + '%';
-      el('r-pfRepay').style.color = pfRepayRatio <= 0.55 ? 'var(--success)' : 'var(--danger)';
+      $('r-pfRepay').textContent    = fmtPct(pfRepayRatio, 1);
+      $('r-pfRepay').style.color    = color(pfRepayRatio, pfRepayRatio <= 0.55);
     } else {
-      el('r-pfRepay').textContent = '—';
-      el('r-pfRepay').style.color = 'var(--text-muted)';
+      $('r-pfRepay').textContent    = '—';
+      $('r-pfRepay').style.color    = 'var(--text-muted)';
     }
 
-    // Screening table
-    const tbody = document.getElementById('screeningBody');
-    tbody.innerHTML = checks.map(c => `
+    /* --- スクリーニングテーブル --- */
+    $('screeningBody').innerHTML = checks.map(c => `
       <tr>
         <td>${c.label}</td>
         <td style="color:var(--text-muted)">${c.target}</td>
@@ -673,36 +767,95 @@
       </tr>
     `).join('');
 
-    // Overall verdict
-    const allPass = checks.every(c => c.warn || c.pass);
-    const verdictEl = document.getElementById('verdict');
-    if (allPass) {
-      verdictEl.textContent = '✓ 全基準クリア — 投資適格';
-      verdictEl.className = 'verdict pass';
-    } else {
-      const failCount = checks.filter(c => !c.warn && !c.pass).length;
-      verdictEl.textContent = `✗ ${failCount}基準未達 — 再検討推奨`;
-      verdictEl.className = 'verdict fail';
-    }
+    /* --- 総合判定 --- */
+    const allPass   = checks.every(c => c.warn || c.pass);
+    const failCount = checks.filter(c => !c.warn && !c.pass).length;
+    const verdictEl = $('verdict');
+    verdictEl.textContent = allPass
+      ? '✓ 全基準クリア — 投資適格'
+      : `✗ ${failCount}基準未達 — 再検討推奨`;
+    verdictEl.className = 'verdict ' + (allPass ? 'pass' : 'fail');
 
-    // Show result
-    document.getElementById('resultCard').classList.remove('hidden');
-    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    /* --- 表示 --- */
+    $('resultCard').classList.remove('hidden');
+    $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // --- localStorage 永続化 ---
-  const STORAGE_KEY = 'realestate-screening-inputs';
+  /* ===== 画像コピー（Notion用）===== */
+  async function copyResultImage() {
+    if (typeof html2canvas === 'undefined') {
+      alert('ライブラリ読み込み中です。少し待ってから再度お試しください。');
+      return;
+    }
+
+    const btn = $('btnCopy');
+    btn.textContent = '生成中…';
+    btn.disabled    = true;
+
+    try {
+      const canvas = await html2canvas($('resultCard'), {
+        backgroundColor: '#1e293b',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: el => el === btn  // コピーボタン自体は除外
+      });
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+
+      /* 成功フィードバック */
+      btn.textContent = '✓ コピーしました！';
+      btn.classList.add('copied');
+
+      const overlay = $('copyOverlay');
+      overlay.classList.add('show');
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        btn.textContent = 'Notionへ画像コピー';
+        btn.classList.remove('copied');
+        btn.disabled = false;
+      }, 2000);
+
+    } catch (e) {
+      console.error(e);
+      /* フォールバック：ダウンロード */
+      const canvas = await html2canvas($('resultCard'), {
+        backgroundColor: '#1e293b', scale: 2, useCORS: true
+      });
+      const a = document.createElement('a');
+      a.download = 'screening-result.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      btn.textContent = '↓ 画像を保存しました';
+      setTimeout(() => {
+        btn.textContent = 'Notionへ画像コピー';
+        btn.disabled = false;
+      }, 2000);
+    }
+  }
+
+  /* ===== Portfolio toggle ===== */
+  $('portfolioToggle').addEventListener('change', function () {
+    $('portfolioFields').classList.toggle('active', this.checked);
+  });
+
+  /* ===== localStorage 永続化 ===== */
+  const STORAGE_KEY = 'realestate-screening-v2';
   const INPUT_IDS = [
-    'price','grossYield','vacancyRate','location',
-    'loanAmount','interestRate','loanYears','downPayment','initialCost',
-    'mgmtFee','utilities','internet','propertyTax','repair',
+    'price','units','monthlyRentPerUnit','vacancyRate','location',
+    'loanAmount','interestRate','loanYears','downPayment','initialCostRate',
+    'opCostRate',
     'existingDS','existingRent'
   ];
 
   function saveInputs() {
     const data = {};
-    INPUT_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
-    data['portfolioToggle'] = document.getElementById('portfolioToggle').checked;
+    INPUT_IDS.forEach(id => { data[id] = $(id).value; });
+    data['portfolioToggle'] = $('portfolioToggle').checked;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
@@ -712,26 +865,26 @@
     try {
       const data = JSON.parse(raw);
       INPUT_IDS.forEach(id => {
-        if (data[id] !== undefined) document.getElementById(id).value = data[id];
+        if (data[id] !== undefined) $(id).value = data[id];
       });
       if (data['portfolioToggle'] !== undefined) {
-        const toggle = document.getElementById('portfolioToggle');
-        toggle.checked = data['portfolioToggle'];
-        document.getElementById('portfolioFields').classList.toggle('active', toggle.checked);
+        $('portfolioToggle').checked = data['portfolioToggle'];
+        $('portfolioFields').classList.toggle('active', data['portfolioToggle']);
       }
-    } catch(e) {}
+    } catch (e) {}
   }
 
-  // 入力変化を監視して保存
   INPUT_IDS.forEach(id => {
-    document.getElementById(id).addEventListener('input', saveInputs);
+    $(id).addEventListener('input',  saveInputs);
+    $(id).addEventListener('change', saveInputs);
   });
-  document.getElementById('portfolioToggle').addEventListener('change', saveInputs);
+  $('portfolioToggle').addEventListener('change', saveInputs);
 
-  // ページ読み込み時に復元
+  /* 初期化 */
   loadInputs();
+  autoCalc();   // 自動計算表示を初期化
 
-  // Service Worker
+  /* ===== Service Worker ===== */
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
