@@ -794,11 +794,15 @@
     btn.disabled    = true;
 
     try {
-      const canvas = await html2canvas($('resultCard'), {
-        backgroundColor: '#1e293b',
+      const canvas = await html2canvas(document.body, {
+        backgroundColor: '#0f172a',
         scale: 2,
         useCORS: true,
         logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.body.scrollWidth,
+        windowHeight: document.body.scrollHeight,
         ignoreElements: el => el === btn  // コピーボタン自体は除外
       });
 
@@ -824,8 +828,11 @@
     } catch (e) {
       console.error(e);
       /* フォールバック：ダウンロード */
-      const canvas = await html2canvas($('resultCard'), {
-        backgroundColor: '#1e293b', scale: 2, useCORS: true
+      const canvas = await html2canvas(document.body, {
+        backgroundColor: '#0f172a', scale: 2, useCORS: true,
+        scrollX: 0, scrollY: 0,
+        windowWidth: document.body.scrollWidth,
+        windowHeight: document.body.scrollHeight
       });
       const a = document.createElement('a');
       a.download = 'screening-result.png';
