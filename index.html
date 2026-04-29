@@ -798,19 +798,23 @@
     window.scrollTo({ top: 0, behavior: 'instant' });
     await new Promise(r => setTimeout(r, 150));
 
+    // スマホ・PCで同一サイズ出力：800px固定幅でレンダリング
+    const FIXED_W = 800;
+    const FIXED_H = Math.round(document.body.scrollHeight * (FIXED_W / document.body.scrollWidth));
+
     const captureOpts = {
       backgroundColor: '#0f172a',
-      scale: 2,
+      scale: 2,             // 2x = 1600px 出力（Retina対応）
       useCORS: true,
       logging: false,
       x: 0,
       y: 0,
       scrollX: 0,
       scrollY: 0,
-      width:        document.body.scrollWidth,
-      height:       document.body.scrollHeight,
-      windowWidth:  document.body.scrollWidth,
-      windowHeight: document.body.scrollHeight,
+      width:        FIXED_W,
+      height:       FIXED_H,
+      windowWidth:  FIXED_W,
+      windowHeight: FIXED_H,
       ignoreElements: el => el === btn
     };
 
