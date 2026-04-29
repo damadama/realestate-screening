@@ -800,7 +800,14 @@
 
     // スマホ・PCで同一サイズ出力：800px固定幅でレンダリング
     const FIXED_W = 800;
-    const FIXED_H = Math.round(document.body.scrollHeight * (FIXED_W / document.body.scrollWidth));
+
+    // 800px幅でのレイアウト高さを実測してから元に戻す
+    const prevMinWidth = document.body.style.minWidth;
+    document.body.style.minWidth = FIXED_W + 'px';
+    await new Promise(r => setTimeout(r, 80));
+    const FIXED_H = document.body.scrollHeight;
+    document.body.style.minWidth = prevMinWidth;
+    await new Promise(r => setTimeout(r, 30));
 
     const captureOpts = {
       backgroundColor: '#0f172a',
