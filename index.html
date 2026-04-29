@@ -793,18 +793,30 @@
     btn.textContent = '生成中…';
     btn.disabled    = true;
 
+    // 一旦最上部にスクロールして全セクションをキャプチャ
+    const prevScrollY = window.scrollY;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    await new Promise(r => setTimeout(r, 150));
+
+    const captureOpts = {
+      backgroundColor: '#0f172a',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: 0,
+      width:        document.body.scrollWidth,
+      height:       document.body.scrollHeight,
+      windowWidth:  document.body.scrollWidth,
+      windowHeight: document.body.scrollHeight,
+      ignoreElements: el => el === btn
+    };
+
     try {
-      const canvas = await html2canvas(document.body, {
-        backgroundColor: '#0f172a',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: document.body.scrollWidth,
-        windowHeight: document.body.scrollHeight,
-        ignoreElements: el => el === btn  // コピーボタン自体は除外
-      });
+      const canvas = await html2canvas(document.body, captureOpts);
+      window.scrollTo({ top: prevScrollY, behavior: 'instant' });
 
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
 
@@ -827,12 +839,10 @@
 
     } catch (e) {
       console.error(e);
+      window.scrollTo({ top: prevScrollY, behavior: 'instant' });
       /* フォールバック：ダウンロード */
       const canvas = await html2canvas(document.body, {
-        backgroundColor: '#0f172a', scale: 2, useCORS: true,
-        scrollX: 0, scrollY: 0,
-        windowWidth: document.body.scrollWidth,
-        windowHeight: document.body.scrollHeight
+        ...captureOpts, ignoreElements: undefined
       });
       const a = document.createElement('a');
       a.download = 'screening-result.png';
